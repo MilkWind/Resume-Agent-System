@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+
+# 临时文件
+temp/
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project-specific
+# Backend env file
+backend/.env
+
+# Reference docs (not needed in VCS)
+参考文档/
+
+# Frontend dependencies and build outputs
+frontend/node_modules/
+frontend/.next/
+frontend/.env.local
+
+# Databases (auto-created at runtime)
+backend/data/resume.db
+backend/data/chroma_db/
+data/resume.db
+data/chroma_db/
+
+backend/cache/
+测试.pdf
