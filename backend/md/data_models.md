@@ -54,4 +54,4 @@
 - `./data/resume.db`：SQLite 数据库
 - `./data/chroma_db`：Chroma 持久化目录
 - `./cache`：Embedding 模型缓存（`shibing624/text2vec-base-chinese`）
-- `.env`：需配 `GEMINI_API_KEY` 等
+- `.env`：需配 `PADDLEOCR_TOKEN`、`SILICONFLOW_API_KEY` 等

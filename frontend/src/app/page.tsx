@@ -2,8 +2,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import {
   Layout,
-  Row,
-  Col,
+  Flex,
   Typography,
   Space,
   Upload,
@@ -24,7 +23,7 @@ import {
 import { InboxOutlined, SendOutlined, DeleteOutlined, ReloadOutlined, UploadOutlined, PlayCircleOutlined } from "@ant-design/icons";
 
 const { Title, Text, Paragraph } = Typography;
-const { Content, Sider } = Layout;
+const { Content } = Layout;
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8000";
 
@@ -200,20 +199,20 @@ export default function Home() {
 
   return (
     <Layout style={{ minHeight: "100vh" }}>
-      <Content style={{ padding: 24 }}>
-        <div className="blur-aura" style={{ marginBottom: 16 }}>
-          <Title level={3} className="gradient-title" style={{ marginBottom: 8 }}>智能简历筛选系统</Title>
-          <Text type="secondary">上传、列表、JD筛选</Text>
-        </div>
-        <Row gutter={16}>
+      <Content style={{ padding: "32px 24px", maxWidth: 1400, margin: "0 auto" }}>
+        <header className="blur-aura" style={{ marginBottom: 28 }}>
+          <Title level={3} className="gradient-title" style={{ marginBottom: 4, fontWeight: 600 }}>智能简历筛选系统</Title>
+          <Text type="secondary" style={{ fontSize: 14, color: "var(--muted)" }}>上传简历 · JD 解析 · 三阶段筛选 · 智能对话</Text>
+        </header>
+        <Flex gap={16} wrap="wrap" style={{ width: "100%" }}>
           {/* 左侧 */}
-          <Col xs={24} md={12}>
+          <Flex flex="1 1 0" style={{ minWidth: 280 }}>
             <Space direction="vertical" size="large" style={{ width: "100%" }}>
               {/* 上传 */}
               <Card
-                className="glass-card glass-hover"
+                className="glass-card glass-hover cursor-pointer"
                 hoverable
-                title="上传简历 (PDF)"
+                title={<span style={{ fontWeight: 600 }}>上传简历 (PDF)</span>}
                 extra={
                   <Space>
                     <Button type="default" icon={<UploadOutlined />} disabled={!(file || files.length) || parseLoading} loading={parseLoading} onClick={onUpload}>上传并解析</Button>
@@ -224,6 +223,7 @@ export default function Home() {
                 <Upload.Dragger
                   multiple={true}
                   accept="application/pdf"
+                  style={{ borderColor: "var(--border)", transition: "border-color 200ms ease" }}
                   beforeUpload={(f) => {
                     const real = f as File;
                     setFile(real); // 保持单文件上传可用（取第一个）
@@ -248,21 +248,23 @@ export default function Home() {
 
               {/* 列表 */}
               <Card
-                className="glass-card glass-hover"
+                className="glass-card glass-hover cursor-pointer"
                 hoverable
-                title={`简历列表 (${resumes.length})`}
+                title={<span style={{ fontWeight: 600 }}>简历列表 ({resumes.length})</span>}
                 extra={<Button icon={<ReloadOutlined />} onClick={fetchResumeList} loading={listLoading}>刷新</Button>}
                 styles={{ body: { padding: 0 } }}
               >
                 <div style={{ height: 180, overflow: "auto", padding: 16 }}>
                 {resumes.length === 0 ? (
-                  <Empty description="暂无简历" />
+                  <Empty description="暂无简历" image={Empty.PRESENTED_IMAGE_SIMPLE} style={{ padding: "24px 0" }} />
                 ) : (
                   <List
                     style={{ height: 300, overflowY: "auto", margin: 0 }}
                     dataSource={resumes}
                     renderItem={(item) => (
                       <List.Item
+                        className="cursor-pointer"
+                        style={{ transition: "background 150ms ease", borderRadius: 8, cursor: "default" }}
                         actions={[
                           <Popconfirm
                             title="确定删除该简历？"
@@ -284,9 +286,9 @@ export default function Home() {
                             <Button type="text" danger icon={<DeleteOutlined />} onClick={(e) => e.stopPropagation()}>删除</Button>
                           </Popconfirm>,
                         ]}
-                        style={{ cursor: "default" }}
                       >
                         <div
+                          className="cursor-pointer"
                           onClick={async () => {
                             setSelectedResume(item);
                             setResumeDetail(null);
@@ -303,7 +305,7 @@ export default function Home() {
                               setResumeDetailLoading(false);
                             }
                           }}
-                          style={{ cursor: "pointer", flex: 1 }}
+                          style={{ flex: 1 }}
                         >
                           <List.Item.Meta
                             title={<Space size={8}><Text strong>{item.name || "未知"}</Text><Tag>{item.id}</Tag></Space>}
@@ -318,9 +320,12 @@ export default function Home() {
               </Card>
 
               {/* 筛选 */}
-              <Card className="glass-card glass-hover" hoverable title="JD 筛选（三阶段 + 六维度二次评分）" extra={<Button type="primary" icon={<PlayCircleOutlined />} onClick={onScreen} loading={screenLoading}>运行筛选</Button>}>
+              <Card className="glass-card glass-hover cursor-pointer" hoverable title={<span style={{ fontWeight: 600 }}>JD 筛选</span>} extra={<Button type="primary" icon={<PlayCircleOutlined />} onClick={onScreen} loading={screenLoading}>运行筛选</Button>}>
                 <Space direction="vertical" size="small" style={{ width: "100%" }}>
-                  <Input.TextArea rows={6} placeholder="粘贴 JD 文本..." value={jdText} onChange={(e) => setJdText(e.target.value)} />
+                  <div>
+                    <Text type="secondary" style={{ fontSize: 12, marginBottom: 4, display: "block" }}>职位描述 (JD)</Text>
+                    <Input.TextArea rows={6} placeholder="粘贴 JD 文本..." value={jdText} onChange={(e) => setJdText(e.target.value)} />
+                  </div>
                   <Space>
                     <Text>TopK:</Text>
                     <InputNumber min={1} max={100} value={topK} onChange={(v) => setTopK(Number(v || 10))} />
@@ -332,7 +337,10 @@ export default function Home() {
                     style={{ marginTop: 12, maxHeight: 420, overflow: "auto" }}
                     dataSource={screenResults}
                     renderItem={(r, idx) => (
-                      <List.Item onClick={async () => {
+                      <List.Item
+                        className="cursor-pointer"
+                        style={{ transition: "background 150ms ease", borderRadius: 8 }}
+                        onClick={async () => {
                         setSelectedScreenItem(r);
                         setScreenDetail(null);
                         setScreenDetailLoading(true);
@@ -346,7 +354,7 @@ export default function Home() {
                           setDrawerOpen(true);
                           setScreenDetailLoading(false);
                         }
-                      }} style={{ cursor: "pointer" }}>
+                      }}>
                         <List.Item.Meta
                           title={<Space><Text strong>{idx + 1}. {r.filename}</Text><Tag color="blue">{r.score2.toFixed(4)}</Tag></Space>}
                           description={<Text type="secondary">技能 {r.explain2?.skills?.toFixed(2)} | 行业 {r.explain2?.domain?.toFixed(2)} | 薪资 {r.explain2?.salary?.toFixed(2)} | 学历 {r.explain2?.education?.toFixed(2)} | 地点 {r.explain2?.location?.toFixed(2)} | 标签 {r.explain2?.tags?.toFixed(2)}</Text>}
@@ -357,28 +365,42 @@ export default function Home() {
                 )}
               </Card>
             </Space>
-          </Col>
+          </Flex>
 
           {/* 右侧 */}
-          <Col xs={24} md={12}>
-            <Card className="glass-card glass-hover" hoverable title="简历智能对话" styles={{ body: { padding: 0 } }}>
+          <Flex flex="1 1 0" style={{ minWidth: 280 }}>
+            <Card className="glass-card glass-hover cursor-pointer" hoverable title={<span style={{ fontWeight: 600 }}>简历智能对话</span>} styles={{ body: { padding: 0 } }}>
               <div style={{ height: "70vh", display: "flex", flexDirection: "column" }}>
                 <div style={{ flex: 1, overflow: "auto", padding: 16 }}>
                   {messages.length === 0 ? (
-                    <Empty description="开始对话，咨询简历筛选相关问题..." />
+                    <Empty
+                      description={
+                        <span style={{ color: "var(--muted)", fontSize: 14 }}>
+                          输入消息开始对话，可咨询简历列表、搜索、筛选结果等
+                        </span>
+                      }
+                      image={Empty.PRESENTED_IMAGE_SIMPLE}
+                      style={{ padding: "48px 24px" }}
+                    />
                   ) : (
                     <List
                       dataSource={messages}
                       renderItem={(msg, idx) => (
-                        <List.Item style={{ justifyContent: msg.role === "user" ? "flex-end" : "flex-start" }}>
-                          <div style={{
-                            maxWidth: "70%",
-                            padding: 12,
-                            borderRadius: 8,
-                            background: msg.role === "user" ? "#1677ff" : "#f5f5f5",
-                            color: msg.role === "user" ? "#fff" : "#333",
-                          }}>
-                            {msg.content}
+                        <List.Item style={{ justifyContent: msg.role === "user" ? "flex-end" : "flex-start", border: "none", padding: "4px 0" }}>
+                          <div
+                            style={{
+                              maxWidth: "75%",
+                              padding: "12px 16px",
+                              borderRadius: 12,
+                              background: msg.role === "user" ? "var(--primary)" : "var(--card-bg)",
+                              color: msg.role === "user" ? "#fff" : "var(--foreground)",
+                              border: msg.role === "assistant" ? "1px solid var(--card-border)" : "none",
+                              boxShadow: msg.role === "assistant" ? "var(--shadow-sm)" : "none",
+                              lineHeight: 1.6,
+                              transition: "box-shadow 200ms ease",
+                            }}
+                          >
+                            <span style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>{msg.content}</span>
                           </div>
                         </List.Item>
                       )}
@@ -387,23 +409,25 @@ export default function Home() {
                   <div ref={chatEndRef} />
                 </div>
                 <Divider style={{ margin: 0 }} />
-                <div style={{ padding: 12 }}>
+                <div style={{ padding: 16, background: "var(--card-bg)", borderTop: "1px solid var(--card-border)" }}>
                   <Space.Compact style={{ width: "100%" }}>
                     <Input
-                      placeholder="输入消息..."
+                      placeholder="输入消息，如：有多少份简历？"
                       value={input}
                       onChange={(e) => setInput(e.target.value)}
-                      onPressEnter={onSendChat}
+                      onPressEnter={(e) => { if (!e.shiftKey) { e.preventDefault(); onSendChat(); } }}
+                      size="large"
+                      style={{ borderRadius: "8px 0 0 8px" }}
                     />
-                    <Button type="primary" icon={<SendOutlined />} loading={chatLoading} onClick={onSendChat}>
+                    <Button type="primary" icon={<SendOutlined />} loading={chatLoading} onClick={onSendChat} size="large" style={{ borderRadius: "0 8px 8px 0" }}>
                       发送
                     </Button>
                   </Space.Compact>
                 </div>
               </div>
             </Card>
-          </Col>
-        </Row>
+          </Flex>
+        </Flex>
         {/* 简历详情 Modal */}
         <Modal
           title={selectedResume ? `简历：${selectedResume.name || "未知"}` : "简历"}

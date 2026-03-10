@@ -1,6 +1,6 @@
-"""LLM服务封装 - Gemini集成"""
+"""LLM服务封装 - SiliconFlow 集成"""
 
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_openai import ChatOpenAI
 from langchain.output_parsers import PydanticOutputParser
 from langchain.prompts import PromptTemplate
 from app.utils.config import get_settings
@@ -12,13 +12,12 @@ class LLMService:
     
     def __init__(self):
         settings = get_settings()
-        
-        # 初始化Gemini模型
-        self.llm = ChatGoogleGenerativeAI(
-            model=settings.GEMINI_MODEL,
-            google_api_key=settings.GEMINI_API_KEY,
-            temperature=settings.TEMPERATURE,
-            max_output_tokens=settings.MAX_TOKENS
+        self.llm = ChatOpenAI(
+            model=settings.SILICONFLOW_CHAT_MODEL,
+            api_key=settings.SILICONFLOW_API_KEY,
+            base_url=settings.SILICONFLOW_BASE_URL,
+            temperature=settings.SILICONFLOW_TEMPERATURE,
+            max_tokens=settings.SILICONFLOW_MAX_TOKENS,
         )
         
         # 初始化输出解析器（自动将LLM输出转为Pydantic模型）

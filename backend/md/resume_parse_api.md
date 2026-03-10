@@ -44,7 +44,7 @@ curl -X POST "http://localhost:8000/api/resume/parse" \
 ```
 
 ## 备注
-- 需要 `.env` 中配置 `GEMINI_API_KEY`。
+- 需要 `.env` 中配置 `SILICONFLOW_API_KEY`。
 - 数据将写入 `SQLite(./data/resume.db)` 与 `Chroma(./data/chroma_db)`。
 
 ---

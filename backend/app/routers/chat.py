@@ -1,4 +1,4 @@
-"""对话接口 - 使用 Gemini 提供咨询与问答，支持查询简历数据库"""
+"""对话接口 - 使用 SiliconFlow (DeepSeek-V3.2) 提供咨询与问答，支持查询简历数据库"""
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 from typing import List, Dict, Any
@@ -6,7 +6,7 @@ from datetime import datetime
 import json
 
 from app.utils.config import get_settings
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_openai import ChatOpenAI
 from langchain.tools import tool
 from langchain.agents import AgentExecutor, create_tool_calling_agent
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
@@ -395,14 +395,18 @@ tools = [
 
 @router.post("/send", response_model=ChatResponse)
 async def chat_send(req: ChatRequest):
-    """发送对话消息，返回 Gemini 回复（支持工具调用查询简历数据库）"""
+    """发送对话消息，返回 SiliconFlow (DeepSeek-V3.2) 回复（支持工具调用查询简历数据库）"""
     try:
         settings = get_settings()
-        llm = ChatGoogleGenerativeAI(
-            model=settings.GEMINI_MODEL,
-            google_api_key=settings.GEMINI_API_KEY,
+        if not settings.SILICONFLOW_API_KEY:
+            raise HTTPException(status_code=500, detail="SILICONFLOW_API_KEY 未配置，请在 .env 中设置")
+
+        llm = ChatOpenAI(
+            model=settings.SILICONFLOW_CHAT_MODEL,
+            api_key=settings.SILICONFLOW_API_KEY,
+            base_url=settings.SILICONFLOW_BASE_URL,
             temperature=0.7,
-            max_output_tokens=2000,
+            max_tokens=2000,
         )
         
         # 构建带工具的 Agent 提示词

@@ -2,7 +2,7 @@
 
 - **方法**: POST
 - **路径**: `/api/chat/send`
-- **说明**: 发送对话消息给 Gemini，返回 AI 回复（支持多轮对话历史 + 工具调用查询简历数据库）
+- **说明**: 发送对话消息给 SiliconFlow，返回 AI 回复（支持多轮对话历史 + 工具调用查询简历数据库）
 - **实现位置**: `backend/app/routers/chat.py` 的 `chat_send()`
 - **特性**: 
   - 使用 LangChain Agent 架构
@@ -116,7 +116,7 @@ curl -X POST "http://localhost:8000/api/chat/send" \
 ```
 
 ## 备注
-- 需要 `.env` 中配置 `GEMINI_API_KEY`
+- 需要 `.env` 中配置 `SILICONFLOW_API_KEY`
 - `temperature` 设为 0.7，适合对话场景
 - 支持多轮对话上下文
 - Agent 会自动判断何时调用工具，无需手动指定

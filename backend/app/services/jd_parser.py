@@ -2,7 +2,7 @@
 
 from langchain.output_parsers import PydanticOutputParser
 from langchain.prompts import PromptTemplate
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_openai import ChatOpenAI
 
 from app.utils.config import get_settings
 from app.model.job_requirement import JDRequirement
@@ -13,11 +13,12 @@ from app.services.embedding_service import EmbeddingService
 class JDParserService:
     def __init__(self) -> None:
         s = get_settings()
-        self.llm = ChatGoogleGenerativeAI(
-            model=s.GEMINI_MODEL,
-            google_api_key=s.GEMINI_API_KEY,
-            temperature=s.TEMPERATURE,
-            max_output_tokens=s.MAX_TOKENS,
+        self.llm = ChatOpenAI(
+            model=s.SILICONFLOW_CHAT_MODEL,
+            api_key=s.SILICONFLOW_API_KEY,
+            base_url=s.SILICONFLOW_BASE_URL,
+            temperature=s.SILICONFLOW_TEMPERATURE,
+            max_tokens=s.SILICONFLOW_MAX_TOKENS,
         )
         # 结构化解析器
         self.parser = PydanticOutputParser(pydantic_object=JDRequirement)

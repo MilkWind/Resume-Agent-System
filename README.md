@@ -4,13 +4,13 @@
 
 ## 功能概览
 
-- **简历解析**：PDF → OCR 提取文本 → Gemini 结构化元数据（姓名/技能/年限/学历/期望等），写入 SQLite 与向量库。
+- **简历解析**：PDF → OCR 提取文本 → SiliconFlow LLM 结构化元数据（姓名/技能/年限/学历/期望等），写入 SQLite 与向量库。
 - **语义检索**：基于 Sentence-Transformers 中文嵌入与 ChromaDB 的 Top-K 检索。
 - **筛选引擎**：
   - 阶段1 语义检索初筛。
   - 阶段2 硬性过滤（年限/学历/技能等）。
   - 阶段3 综合评分 + 二次多维度评分（技能/行业/薪资/学历/地点/标签）。
-- **自然语言对话**：基于 Gemini + 工具调用，支持查询简历列表/搜索/详情/统计。
+- **自然语言对话**：基于 SiliconFlow + 工具调用，支持查询简历列表/搜索/详情/统计。
 - **前端控制台**：上传与批量上传、列表与删除、JD 筛选、对话等。
 
 ## 目录结构
@@ -28,7 +28,7 @@
 │   │   │   ├── screening.py     # /api/screening 运行筛选
 │   │   │   └── chat.py          # /api/chat 对话
 │   │   ├── services/        # LLM/嵌入/筛选/向量库等服务
-│   │   │   ├── llm_service.py       # Gemini + Pydantic 输出
+│   │   │   ├── llm_service.py       # SiliconFlow + Pydantic 输出
 │   │   │   ├── embedding_service.py # text2vec 中文嵌入
 │   │   │   ├── vector_store.py      # ChromaDB 封装
 │   │   │   ├── jd_parser.py         # JD 解析 + 检索文本生成
@@ -56,23 +56,20 @@
 
 ## 技术栈
 
-- 后端：`FastAPI`、`SQLAlchemy`、`ChromaDB`、`sentence-transformers`、`LangChain`、`langchain-google-genai`、`PaddleOCR`、`PyMuPDF`
+- 后端：`FastAPI`、`SQLAlchemy`、`ChromaDB`、`sentence-transformers`、`LangChain`、`langchain-openai`、`PaddleOCR API`
 - 前端：`Next.js 15`、`React 19`、`Ant Design 5`
 
 ## 环境与配置
 
 - Python 3.12+
 - Node.js 18+
-- Gemini API Key（Google Generative AI）
+- PaddleOCR API Token、SiliconFlow API Key
 
 后端环境变量（`backend/.env`，参考 `backend/env.example`）：
 
 ```
-GEMINI_API_KEY=你的密钥
-# 以下为默认值（如需自定义可在 `app/utils/config.py` 中修改）
-GEMINI_MODEL=gemini-2.5-flash
-TEMPERATURE=0.1
-MAX_TOKENS=2000
+PADDLEOCR_TOKEN=xxxxxx
+SILICONFLOW_API_KEY=xxxxxx
 ```
 
 存储路径（见 `backend/app/utils/config.py`）：
@@ -92,7 +89,7 @@ NEXT_PUBLIC_API_BASE=http://localhost:8000
 - **后端**
   - 进入 `backend/`
   - `pip install -r requirements.txt`
-  - 复制 `env.example` 为 `.env` 并填写 `GEMINI_API_KEY`
+  - 复制 `env.example` 为 `.env` 并填写 `PADDLEOCR_TOKEN`、`SILICONFLOW_API_KEY`
   - 运行：
     ```bash
     uvicorn main:app --reload --port 8000
@@ -132,7 +129,7 @@ NEXT_PUBLIC_API_BASE=http://localhost:8000
   - `POST /run` `{jd_text, top_k}` → 阶段1语义检索 → 阶段2硬过滤 → 阶段3评分+二次多维评分，返回 `score`、`score2` 与解释项
 
 - **对话 `app/routers/chat.py`（前缀 `/api/chat`）**
-  - `POST /send` `{messages:[{role,content}]}` → Gemini Agent 调用工具（列表/搜索/详情/统计）并回复
+  - `POST /send` `{messages:[{role,content}]}` → SiliconFlow Agent 调用工具（列表/搜索/详情/统计）并回复
 
 ## 数据模型要点
 
@@ -145,11 +142,11 @@ NEXT_PUBLIC_API_BASE=http://localhost:8000
 - **上传/批量上传**：仅支持 PDF，完成后自动入库与向量化。
 - **列表与详情**：展示解析出的 `name/skills/...`，支持删除。
 - **JD 筛选**：输入 JD 文本与 TopK，查看排序结果与多维度评分解释。
-- **简历对话**：与 Gemini 对话，自动调用工具查询简历数据。
+- **简历对话**：与 SiliconFlow 对话，自动调用工具查询简历数据。
 
 ## 注意事项
 
-- OCR 使用 `PaddleOCR.predict`，大文件会逐页转图后识别，处理期间使用系统临时目录（见 `pdf_ocr.py`）。
+- OCR 使用 PaddleOCR API（PaddleOCR-CL-1.5），异步提交任务并轮询结果。
 - 首次运行会在 `backend/data/` 与 `backend/cache/` 下创建数据库、向量库与模型缓存。
 ---
 
